@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Management</title>
+    <link rel="stylesheet" href="../static/styles/home.css">
+</head>
+<body>
+    <h1>Payment Management</h1>
+    <div>
+    <form action="/add_payment" method="POST">
+        <label for="company_name">Company Name:</label>
+        <input type="text" id="company_name" name="company_name" required><br><br>
+
+        <label for="amount">Amount:</label>
+        <input type="number" id="amount" name="amount" step="0.01" required><br><br>
+
+        <label for="payment_date">Payment Date:</label>
+        <input type="date" id="payment_date" name="payment_date" required><br><br>
+
+        <label for="status">Status:</label>
+        <input type="text" id="status" name="status" required><br><br>
+
+        <label for="due_date">Due Date:</label>
+        <input type="date" id="due_date" name="due_date" required><br><br>
+
+        <label for="tax_rate">Tax Rate:</label>
+        <input type="number" id="tax_rate" name="tax_rate" step="0.01" required><br><br>
+
+        <button type="submit">Add Payment</button>
+    </form>
+    </div>
+<div>
+    <h3>Select a due date to view the dynamic payment summary</h3>
+
+    <select id="dueDate" name="dueDate" required>
+        <option value="">Select Due Date</option>
+                {% for due_date in due_dates %}
+                <option value="{{ due_date }}">{{ due_date }}</option>
+                {% endfor %}
+    </select><br>
+
+    
+    <h2>Payments</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>S.No</th>
+                <th>Company Name</th>
+                <th>Amount</th>
+                <th>Payment Date</th>
+                <th>Status</th>
+                <th>Due Date</th>
+                <th>Tax Rate</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for payment in payments %}
+            <tr>
+                <td>{{payment.id}}</td>
+                <td>{{ payment.company_name }}</td>
+                <td>{{ payment.amount }}</td>
+                <td>{{ payment.payment_date }}</td>
+                <td>{{ payment.status }}</td>
+                <td>{{ payment.due_date }}</td>
+                <td>{{ payment.tax_rate }}</td>
+                <td>
+                    <form action="/update_payment/{{ payment.id }}" method="GET">
+                        <button type="submit">Update</button>
+                    </form>
+                    <form action="/delete_payment/{{ payment.id }}" method="POST">
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+<script>
+    window.onload = async function() {
+            await fetchSummary();
+        }
+
+        // Fetch and display summary on due date change
+        document.getElementById('dueDate').addEventListener('change', async function() {
+            await fetchSummary();
+        });
+
+        async function fetchSummary() {
+            const dueDate = document.getElementById('dueDate').value;
+            const response = await fetch(`/summary?dueDate=${dueDate}`);
+            const data = await response.json();
+            document.getElementById('summary').innerHTML = data.html;
+        }
+
+
+</script>
+</html>
